@@ -10,21 +10,31 @@
  * Implements hook_init().
  */
 function shib_auth_keepalive_init() {
-	
+	global $user;
+
+  if (user_is_anonymous() && !isset($_COOKIES['shib_auth_keepalive_stored']) && isset($_COOKIES['shib_auth_keepalive_session'])) {
+    setcookie($_COOKIES['shib_auth_keepalive_session_key'], $_COOKIES['shib_auth_keepalive_session_value']);
+    setcookie('ah_app_server', $_COOKIES['shib_auth_keepalive_ah_app_server']);  
+
+    /* redirect to sso url */
+  }
 }
 
-/**
- * Implements hook_menu().
- */
-function shib_auth_keepalive_menu() {
-	$items['admin/user/shib_auth/keepalive'] = array(
-    'title'            => 'Keep-alive settings',
-    'type'             => MENU_LOCAL_TASK,
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('shib_auth_keepalive_admin'),
-    'access arguments' => array('administer shibboleth authentication'),
-    'weight'           => 10,
-  );
-	return $items;
-}
+/* implementation of hook_exit
+   Creates persistent cookies */
+function shib_auth_keepalive_exit() {
+  global $user;
 
+  if($user->uid && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
+    setcookie('shib_auth_keepalive_stored', TRUE);
+    if (!empty($_COOKIES)) {
+      foreach($_COOKIES as $key => $value) {
+        if (substr($key, 0 , 13) == '_shibsesssion_')) {
+          setcookie('shib_auth_keepalive_session_key', $key);
+          setcookie('shib_auth_keepalive_session_value', $value);
+          setcookie('shib_auth_keepalive_ah_app_server', $_COOKIES['ah_app_server']);
+        }
+      }  
+    }
+  }
+}
