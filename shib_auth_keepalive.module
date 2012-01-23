@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Session keep-alive for Shibboleth authentication by storing the verification token locally and verifying 
+ * it in a hook_init. The duration of the keep-alive is configurable via the admin interface.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function shib_auth_keepalive_init() {
+	
+}
+
+/**
+ * Implements hook_menu().
+ */
+function shib_auth_keepalive_menu() {
+	$items['admin/user/shib_auth/keepalive'] = array(
+    'title'            => 'Keep-alive settings',
+    'type'             => MENU_LOCAL_TASK,
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('shib_auth_keepalive_admin'),
+    'access arguments' => array('administer shibboleth authentication'),
+    'weight'           => 10,
+  );
+	return $items;
+}
+

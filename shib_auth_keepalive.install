@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Schema for the Shibboleth authentication.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function shib_auth_keepalive_schema() {
+	
+}
