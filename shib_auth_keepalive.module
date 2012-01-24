@@ -2,34 +2,39 @@
 
 /**
  * @file
- * Session keep-alive for Shibboleth authentication by storing the verification token locally and verifying 
- * it in a hook_init. The duration of the keep-alive is configurable via the admin interface.
+ * Session keep-alive for Shibboleth IPD by creating a persistent cookie out of the shibboleth ones
+ * and forwarding the user to the login url to re-create the proper authentication cookies.
+ * Also stores the app server cookie so the same load balancer is hit by the request, making sure
+ * that the same shibboleth instance generates the cookies.
  */
 
 /**
  * Implements hook_init().
  */
 function shib_auth_keepalive_init() {
-	global $user;
-
   if (user_is_anonymous() && !isset($_COOKIES['shib_auth_keepalive_stored']) && isset($_COOKIES['shib_auth_keepalive_session'])) {
     setcookie($_COOKIES['shib_auth_keepalive_session_key'], $_COOKIES['shib_auth_keepalive_session_value']);
     setcookie('ah_app_server', $_COOKIES['shib_auth_keepalive_ah_app_server']);  
 
-    /* redirect to sso url */
+    // Now redirect to the SSO url.
+    drupal_goto(shib_auth_config('login_url'));
   }
 }
 
+/**
+ * Implements hook_exit().
+ * Create a persistent cookie out of the ones
+ */
 /* implementation of hook_exit
    Creates persistent cookies */
 function shib_auth_keepalive_exit() {
   global $user;
 
-  if($user->uid && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
+  if ($user->uid && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
     setcookie('shib_auth_keepalive_stored', TRUE);
     if (!empty($_COOKIES)) {
       foreach($_COOKIES as $key => $value) {
-        if (substr($key, 0 , 13) == '_shibsesssion_')) {
+        if (substr($key, 0, 13) == '_shibsesssion_') {
           setcookie('shib_auth_keepalive_session_key', $key);
           setcookie('shib_auth_keepalive_session_value', $value);
           setcookie('shib_auth_keepalive_ah_app_server', $_COOKIES['ah_app_server']);
@@ -37,4 +42,16 @@ function shib_auth_keepalive_exit() {
       }  
     }
   }
+}
+
+/**
+ * Implements hook_user().
+ * Make sure to destroy the keep-alive cookies when the user logs out.
+ */
+function shib_auth_keepalive_user($op, &$edit, &$account) {
+	if ($op == 'logout') {
+		setcookie($_COOKIES['shib_auth_keepalive_session_key'], '', time() - 3600);
+		setcookie($_COOKIES['shib_auth_keepalive_session_value'], '', time() - 3600);
+		setcookie($_COOKIES['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
+	}
 }
