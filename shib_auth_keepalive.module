@@ -45,8 +45,10 @@ function shib_auth_keepalive_exit() {
  * Implements hook_user().
  * Make sure to destroy the keep-alive cookies when the user logs out.
  */
-function shib_auth_keepalive_user_logout( &$edit, &$account) {
-	setcookie($_COOKIES['shib_auth_keepalive_session_key'], '', time() - 3600);
-	setcookie($_COOKIES['shib_auth_keepalive_session_value'], '', time() - 3600);
-	setcookie($_COOKIES['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
+function shib_auth_keepalive_user($op, &$edit, &$account) {
+  if($op == "logout") {
+    setcookie($_COOKIES['shib_auth_keepalive_session_key'], '', time() - 3600);
+    setcookie($_COOKIES['shib_auth_keepalive_session_value'], '', time() - 3600);
+    setcookie($_COOKIES['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
+  }
 }
