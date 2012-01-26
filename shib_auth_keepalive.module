@@ -23,7 +23,7 @@ function shib_auth_keepalive_init() {
 
 /**
  * Implements hook_exit().
- * Create a persistent cookie out of the ones
+ * Create a persistent cookie out of the ones that shibboleth gave that would otherwise expire with browser.
  */
 function shib_auth_keepalive_exit() {
 
