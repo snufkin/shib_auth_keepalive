@@ -23,7 +23,7 @@ function shib_auth_keepalive_init() {
 
 /**
  * Implements hook_exit().
- * Create a persistent cookie out of the ones
+ * Create a persistent cookie out of the ones that shibboleth gave that would otherwise expire with browser.
  */
 function shib_auth_keepalive_exit() {
 
@@ -46,7 +46,7 @@ function shib_auth_keepalive_exit() {
  * Make sure to destroy the keep-alive cookies when the user logs out.
  */
 function shib_auth_keepalive_user($op, &$edit, &$account) {
-  if($op == "logout") {
+  if ($op == "logout") {
     setcookie($_COOKIES['shib_auth_keepalive_session_key'], '', time() - 3600);
     setcookie($_COOKIES['shib_auth_keepalive_session_value'], '', time() - 3600);
     setcookie($_COOKIES['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
