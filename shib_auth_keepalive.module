@@ -25,12 +25,9 @@ function shib_auth_keepalive_init() {
  * Implements hook_exit().
  * Create a persistent cookie out of the ones
  */
-/* implementation of hook_exit
-   Creates persistent cookies */
 function shib_auth_keepalive_exit() {
-  global $user;
 
-  if ($user->uid && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
+  if (!user_is_anonymous() && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
     setcookie('shib_auth_keepalive_stored', TRUE);
     if (!empty($_COOKIES)) {
       foreach($_COOKIES as $key => $value) {
