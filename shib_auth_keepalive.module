@@ -12,9 +12,9 @@
  * Implements hook_init().
  */
 function shib_auth_keepalive_init() {
-  if (user_is_anonymous() && !isset($_COOKIES['shib_auth_keepalive_stored']) && isset($_COOKIES['shib_auth_keepalive_session'])) {
-    setcookie($_COOKIES['shib_auth_keepalive_session_key'], $_COOKIES['shib_auth_keepalive_session_value'], time() + 86400);
-    setcookie('ah_app_server', $_COOKIES['shib_auth_keepalive_ah_app_server'], time() + 86400);  
+  if (user_is_anonymous() && !isset($_COOKIE['shib_auth_keepalive_stored']) && isset($_COOKIE['shib_auth_keepalive_session_value'])) {
+    setcookie($_COOKIE['shib_auth_keepalive_session_key'], $_COOKIE['shib_auth_keepalive_session_value'], time() + 86400);
+    setcookie('ah_app_server', $_COOKIE['shib_auth_keepalive_ah_app_server'], time() + 86400);  
 
     // Now redirect to the SSO url.
     drupal_goto(shib_auth_config('login_url'));
@@ -29,12 +29,12 @@ function shib_auth_keepalive_exit() {
 
   if (!user_is_anonymous() && !isset($_COOKIE['shib_auth_keepalive_stored'])) {
     setcookie('shib_auth_keepalive_stored', TRUE);
-    if (!empty($_COOKIES)) {
-      foreach($_COOKIES as $key => $value) {
-        if (substr($key, 0, 13) == '_shibsesssion_') {
+    if (!empty($_COOKIE)) {
+      foreach($_COOKIE as $key => $value) {
+	if (substr($key, 0, 13) == '_shibsession_') {
           setcookie('shib_auth_keepalive_session_key', $key, time() + 86400);
           setcookie('shib_auth_keepalive_session_value', $value, time() + 86400);
-          setcookie('shib_auth_keepalive_ah_app_server', $_COOKIES['ah_app_server'], time() + 86400);
+          setcookie('shib_auth_keepalive_ah_app_server', $_COOKIE['ah_app_server'], time() + 86400);
         }
       }  
     }
@@ -47,8 +47,8 @@ function shib_auth_keepalive_exit() {
  */
 function shib_auth_keepalive_user($op, &$edit, &$account) {
   if ($op == "logout") {
-    setcookie($_COOKIES['shib_auth_keepalive_session_key'], '', time() - 3600);
-    setcookie($_COOKIES['shib_auth_keepalive_session_value'], '', time() - 3600);
-    setcookie($_COOKIES['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
+    setcookie($_COOKIE['shib_auth_keepalive_session_key'], '', time() - 3600);
+    setcookie($_COOKIE['shib_auth_keepalive_session_value'], '', time() - 3600);
+    setcookie($_COOKIE['shib_auth_keepalive_ah_app_server'], '', time() - 3600);
   }
 }
